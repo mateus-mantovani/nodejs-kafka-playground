@@ -3,17 +3,22 @@ kafka-topics --create --topic=teste --bootstrap-server=localhost:9092 --partitio
 kafka-topics --list --bootstrap-server=localhost:9092
 kafka-topics --bootstrap-server=localhost:9092 --topic=teste --describe
 
--- CONSUMER
-kafka-console-consumer --bootstrap-server=localhost:9092 --topic=teste
+## Consumer
+```kafka-console-consumer --bootstrap-server=localhost:9092 --topic=teste```
 
--- CONSUMER BY GROUP
-kafka-console-consumer --bootstrap-server=localhost:9092 --topic=teste --group=x
+-- Cosumer by group
+```kafka-console-consumer --bootstrap-server=localhost:9092 --topic=teste --group=x```
 
--- PRODUCER
+-- Producer
+```
 kafka-console-producer --bootstrap-server=localhost:9092 --topic=test
-    >(digitar sua mensagem)
+    >(enter your message)
+```
 
 # Node aplication
 To start node aplication:
-``` docker exec -it nodekafka bash
-    src/producer/producer.js
+```
+docker exec -it nodekafka bash
+node src/producer/producer.js -- if you want produce messages
+```
+    
