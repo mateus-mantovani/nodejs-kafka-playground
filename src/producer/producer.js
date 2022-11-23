@@ -1,43 +1,68 @@
 const Kafka = require('node-rdkafka')
 
 class Producer {
-    #producer;
-    constructor() {
-        this.init()
-        this.registerError();
-    }
+    ERR_TOPIC_ALREADY_EXISTS = 36;
 
-    init() {
-        this.#producer = new Kafka.Producer({
-            'metadata.broker.list': 'kafka-kafka-1:9092'
+    ensureTopicExists() {
+        const adminClient = Kafka.AdminClient.create({
+            'bootstrap.servers': 'kafka-kafka-1:9092'
         });
-        this.#producer.connect();
-        this.#producer.setPollInterval(100);
+        return new Promise((resolve, reject) => {
+            adminClient.createTopic({
+                topic: 'topic-custom-event-2',
+                num_partitions: 1,
+                replication_factor: 1
+            }, (err) => {
+                if (!err) {
+                    console.log(`Created topic`);
+                    return resolve();
+                }
+        
+                if (err.code === this.ERR_TOPIC_ALREADY_EXISTS) {
+                    console.log(`Topic already exists`);
+                    return resolve();
+                }
+        
+                return reject(err);
+            })
+        });
     }
 
-    registerError() {
-        this.#producer.on('event.error', function(err) {
-            console.error('Error from producer')
-            console.error(err)
+    async createProducer() {
+        this.producer = new Kafka.Producer({
+            'bootstrap.servers': 'kafka-kafka-1:9092',
+            'dr_cb': true
         })
+        return new Promise((resolve, reject) => {
+            this.producer
+                .on('ready', () => resolve(this.producer))
+                .on('delivery-report', this.onDeliveryReport)
+                .on('event.error', (err) => {
+                    console.warn('event.error', err);
+                    reject(err);
+                });
+            this.producer.setPollInterval(100);
+            this.producer.connect();
+        });
     }
 
-    publish(message) {
-        this.#producer.on('ready', () => {
-            try {
-                this.#producer.produce(
-                    'topic-custom-event',
-                    null,
-                    Buffer.from(message)
-                );
-            } catch (err) {
-                console.error('A problem occurred when sending our message');
-                console.error(err);
-            }
-        })
+    async publish(message) {
+        await this.ensureTopicExists()
+        await this.createProducer()
+
+        this.producer.produce('topic-custom-event-2', null, Buffer.from(message));
+        console.log(`Producing record ${message}`);
+    }
+
+    onDeliveryReport(err, report) {
+        if (err) {
+            console.warn('Error producing', err)
+        } else {
+            const {topic, partition, value} = report;
+            console.log(`Successfully produced record to topic "${topic}" partition ${partition} ${value}`);
+        }
     }
 }
 
 const producer = new Producer();
-
 producer.publish('{ "action": "OPEN_THE_DOOR" }');
