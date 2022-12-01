@@ -1,13 +1,16 @@
 # Kafka docker commands
 kafka-topics --create --topic=teste --bootstrap-server=localhost:9092 --partitions=3
 kafka-topics --list --bootstrap-server=localhost:9092
-kafka-topics --bootstrap-server=localhost:9092 --topic=teste --describe
+kafka-topics --bootstrap-server=localhost:9092 --topic=topic-custom-event-2 --describe
+
+check the consumers that are attached to the topic
+kafka-consumer-groups --bootstrap-server=localhost:9092 --group=x --describe
 
 ## Consumer
-```kafka-console-consumer --bootstrap-server=localhost:9092 --topic=teste```
+```kafka-console-consumer --bootstrap-server=localhost:9092 --topic=topic-custom-event-2```
 
--- Cosumer by group
-```kafka-console-consumer --bootstrap-server=localhost:9092 --topic=teste --group=x```
+-- Cosumer creating a group
+```kafka-console-consumer --bootstrap-server=localhost:9092 --topic=topic-custom-event-2 --group=x```
 
 -- Producer
 ```

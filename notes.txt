@@ -1,0 +1,10 @@
+Documentation:
+- https://github.com/Blizzard/node-rdkafka
+- https://github.com/confluentinc/examples/tree/0e2130e0602b45f095770a8401ad998b415526f4/clients/cloud/nodejs
+- https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+
+Notes:
+- when you work with keys, the messages always fall into the same partition;
+- it is not useful to have more consumers than partitions in the same group;
+- by default the Kafka lib for Node already rebalances when plugging in new consumers, but there is an option "rebalance_cb" if you want to overwrite it;
+- if you start a consumer that consumes the old messages and then start a new consumer in the same group, also with the "earliest configuration", this second one will not read the old messages, because the oldest consumer has already read the messages.
